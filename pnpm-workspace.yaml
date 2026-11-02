@@ -1,0 +1,20 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@shopify/react-native-skia': true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@expo/cli@57.0.9'
+  - '@expo/metro-config@57.0.6'
+  - '@expo/metro-runtime@57.0.6'
+  - '@expo/prebuild-config@57.0.8'
+  - '@expo/ui@57.0.7'
+  - expo-asset@57.0.6
+  - expo-constants@57.0.6
+  - expo-modules-autolinking@57.0.8
+  - expo-modules-core@57.0.6
+  - expo-router@57.0.7
+  - expo@57.0.7
+patchedDependencies:
+  expo-modules-jsi@57.0.3: patches/expo-modules-jsi@57.0.3.patch

@@ -1,0 +1,13 @@
+{
+  "name": "pose-coach",
+  "private": true,
+  "scripts": {
+    "start": "pnpm --filter mobile exec node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost",
+    "start:clear": "pnpm --filter mobile exec node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --clear",
+    "start:device": "pnpm --filter mobile exec expo start --dev-client --lan",
+    "test": "node --test apps/mobile/tests/*.test.cjs",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint"
+  },
+  "packageManager": "pnpm@11.12.0"
+}

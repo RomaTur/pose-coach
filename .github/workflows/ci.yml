@@ -1,0 +1,35 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@b1e47f6fef0327f62a1c3a39e58605704ac152a5 # v3
+        with:
+          runtime: node@26.4.0
+          require-lockfile: true
+      - run: pnpm test
+      - run: pnpm typecheck
+      - run: pnpm lint
+      # Экспорт проверяет JS/assets, но не заменяет сборку Xcode и живую камеру.
+      - run: pnpm --filter mobile exec expo export --platform ios --output-dir /tmp/pose-coach-export

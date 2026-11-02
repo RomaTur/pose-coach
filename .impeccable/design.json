@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-30T14:26:09Z",
+  "title": "Design System: Pose Coach",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "background",
+        "tonalRamp": [
+          "oklch(15.00% 0.0110 229.64)",
+          "oklch(26.43% 0.0110 229.64)",
+          "oklch(37.86% 0.0110 229.64)",
+          "oklch(49.29% 0.0110 229.64)",
+          "oklch(60.71% 0.0110 229.64)",
+          "oklch(72.14% 0.0110 229.64)",
+          "oklch(83.57% 0.0110 229.64)",
+          "oklch(95.00% 0.0110 229.64)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0174 214.78)",
+          "oklch(26.43% 0.0174 214.78)",
+          "oklch(37.86% 0.0174 214.78)",
+          "oklch(49.29% 0.0174 214.78)",
+          "oklch(60.71% 0.0174 214.78)",
+          "oklch(72.14% 0.0174 214.78)",
+          "oklch(83.57% 0.0174 214.78)",
+          "oklch(95.00% 0.0174 214.78)"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "raised",
+        "tonalRamp": [
+          "oklch(15.00% 0.0205 211.24)",
+          "oklch(26.43% 0.0205 211.24)",
+          "oklch(37.86% 0.0205 211.24)",
+          "oklch(49.29% 0.0205 211.24)",
+          "oklch(60.71% 0.0205 211.24)",
+          "oklch(72.14% 0.0205 211.24)",
+          "oklch(83.57% 0.0205 211.24)",
+          "oklch(95.00% 0.0205 211.24)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "text",
+        "tonalRamp": [
+          "oklch(15.00% 0.0055 183.03)",
+          "oklch(26.43% 0.0055 183.03)",
+          "oklch(37.86% 0.0055 183.03)",
+          "oklch(49.29% 0.0055 183.03)",
+          "oklch(60.71% 0.0055 183.03)",
+          "oklch(72.14% 0.0055 183.03)",
+          "oklch(83.57% 0.0055 183.03)",
+          "oklch(95.00% 0.0055 183.03)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.0227 182.37)",
+          "oklch(26.43% 0.0227 182.37)",
+          "oklch(37.86% 0.0227 182.37)",
+          "oklch(49.29% 0.0227 182.37)",
+          "oklch(60.71% 0.0227 182.37)",
+          "oklch(72.14% 0.0227 182.37)",
+          "oklch(83.57% 0.0227 182.37)",
+          "oklch(95.00% 0.0227 182.37)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.1040 186.82)",
+          "oklch(26.43% 0.1040 186.82)",
+          "oklch(37.86% 0.1040 186.82)",
+          "oklch(49.29% 0.1040 186.82)",
+          "oklch(60.71% 0.1040 186.82)",
+          "oklch(72.14% 0.1040 186.82)",
+          "oklch(83.57% 0.1040 186.82)",
+          "oklch(95.00% 0.1040 186.82)"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "on-accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.0258 182.83)",
+          "oklch(26.43% 0.0258 182.83)",
+          "oklch(37.86% 0.0258 182.83)",
+          "oklch(49.29% 0.0258 182.83)",
+          "oklch(60.71% 0.0258 182.83)",
+          "oklch(72.14% 0.0258 182.83)",
+          "oklch(83.57% 0.0258 182.83)",
+          "oklch(95.00% 0.0258 182.83)"
+        ]
+      },
+      "danger": {
+        "role": "error",
+        "displayName": "danger",
+        "tonalRamp": [
+          "oklch(15.00% 0.0896 28.41)",
+          "oklch(26.43% 0.0896 28.41)",
+          "oklch(37.86% 0.0896 28.41)",
+          "oklch(49.29% 0.0896 28.41)",
+          "oklch(60.71% 0.0896 28.41)",
+          "oklch(72.14% 0.0896 28.41)",
+          "oklch(83.57% 0.0896 28.41)",
+          "oklch(95.00% 0.0896 28.41)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "heading": {
+        "displayName": "Заголовок",
+        "purpose": "Заголовок группы."
+      },
+      "body": {
+        "displayName": "Основной текст",
+        "purpose": "Объяснения и состояние."
+      },
+      "muted": {
+        "displayName": "Дополнительный текст",
+        "purpose": "Второстепенная информация."
+      },
+      "action": {
+        "displayName": "Действие",
+        "purpose": "Подпись кнопки."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Основная кнопка",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Схематичный HTML-пример токенов, не iOS-рендер. Focus outline нужен только панели документации.",
+      "html": "<button class=\"ds-action\">Начать подход</button>",
+      "css": ".ds-action{display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-height:50px;padding:14px 18px;border:0;border-radius:12px;font:600 17px system-ui;white-space:normal;text-align:center;cursor:pointer}.ds-action:active,.ds-action:disabled{opacity:.55}.ds-action:disabled{cursor:default}.ds-action:focus-visible{outline:2px solid currentColor;outline-offset:3px}.ds-action:hover{cursor:pointer}.ds-action{background:#69D9CE;color:#102320}"
+    },
+    {
+      "name": "Второстепенная кнопка",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Схематичный HTML-пример токенов, не iOS-рендер. Focus outline нужен только панели документации.",
+      "html": "<button class=\"ds-action\">Завершить подход</button>",
+      "css": ".ds-action{display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-height:50px;padding:14px 18px;border:0;border-radius:12px;font:600 17px system-ui;white-space:normal;text-align:center;cursor:pointer}.ds-action:active,.ds-action:disabled{opacity:.55}.ds-action:disabled{cursor:default}.ds-action:focus-visible{outline:2px solid currentColor;outline-offset:3px}.ds-action:hover{cursor:pointer}.ds-action{background:#273639;color:#F3F8F7}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Спокойный тёмный интерфейс тренировки",
+    "overview": "Зафиксировано существующее направление, подтверждённое владельцем: тёмная поверхность, бирюзовый акцент, крупный счётчик и понятные нативные действия. Это описание реализации, не новый брендинг и не свидетельство завершённой визуальной или accessibility-приёмки.",
+    "keyCharacteristics": [
+      "Графитовая основа, светлый текст и один основной акцент.",
+      "Системная типографика без декоративного шрифта.",
+      "Явные состояния ожидания, паузы, ошибки и сохранения.",
+      "Демонстрация отличима от живого распознавания."
+    ],
+    "rules": [],
+    "dos": [
+      "Использовать существующие общие токены и компоненты.",
+      "Сохранять переносы текста, safe area и системное масштабирование.",
+      "Показывать причину ошибки и выполнимое действие восстановления.",
+      "Проверять финальную раскладку на настоящем симуляторе/устройстве."
+    ],
+    "donts": [
+      "Не представлять demo или host-тест как доказательство качества live ML.",
+      "Не перекрывать суставы подсказками и кнопками.",
+      "Не сбрасывать сессию ради изменения размера текста или интерфейса.",
+      "Не объявлять светлую тему, VoiceOver или физические FPS проверенными без данных."
+    ]
+  }
+}
