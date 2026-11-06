@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TfliteModel } from 'react-native-fast-tflite';
 import { useFrameCallback, useSharedValue } from 'react-native-reanimated';
-import { useFrameOutput } from 'react-native-vision-camera';
+import { type Frame, useFrameOutput } from 'react-native-vision-camera';
 import { useResizer } from 'react-native-vision-camera-resizer';
 import { createShareable, scheduleOnRN, scheduleOnRuntimeWithId, scheduleOnUI, UIRuntimeId } from 'react-native-worklets';
 
@@ -28,6 +28,9 @@ export interface PoseSummary {
 export const EMPTY_POSE_SUMMARY: PoseSummary = {
   angle: null, bodyVisible: false, modelFps: null, avgMs: null, p95Ms: null,
 };
+
+// Одинаковое разрешение должно сохранять ссылку между обновлениями HUD.
+const FRAME_RESOLUTION = { width: 640, height: 480 } as const;
 
 export function usePosePipeline(model: TfliteModel | undefined, isActive: boolean,
   onSummary: (summary: PoseSummary) => void,
@@ -135,10 +138,9 @@ export function usePosePipeline(model: TfliteModel | undefined, isActive: boolea
     }
   });
 
-  const output = useFrameOutput({
-    pixelFormat: 'yuv', targetResolution: { width: 640, height: 480 },
-    enablePhysicalBufferRotation: false, dropFramesWhileBusy: true,
-    onFrame(frame) {
+  // HUD перерисовывает экран, но это не новая камера и не новый обработчик.
+  // Пауза читается через shared values; замена модели/resizer обновляет callback.
+  const onFrame = useCallback((frame: Frame) => {
       'worklet';
       let generation = 0;
       try {
@@ -179,8 +181,13 @@ export function usePosePipeline(model: TfliteModel | undefined, isActive: boolea
           if (uiCommits.isHost) uiCommits.value.commitFailure(frameEpoch, reason);
         }, generation, error instanceof Error ? error.message : 'Unknown frame error');
       } finally { frame.dispose(); }
-    },
-  });
+  }, [enabled, epoch, failed, lastFrameAt, model, resizer, uiCommits]);
+
+  const frameOutputOptions = useMemo(() => ({
+    pixelFormat: 'yuv' as const, targetResolution: FRAME_RESOLUTION,
+    enablePhysicalBufferRotation: false, dropFramesWhileBusy: true, onFrame,
+  }), [onFrame]);
+  const output = useFrameOutput(frameOutputOptions);
 
   return { output, pose, error: processingError ?? (resizeState.state === 'error'
     ? 'GPU-обработка недоступна на этом устройстве.' : null),

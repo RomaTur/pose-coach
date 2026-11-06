@@ -8,23 +8,37 @@ const path = require('node:path');
 // Исполняем настоящий hook и геометрию, заменяя нативные API очередями RN/UI/Worker.
 // Этот host-тест не проверяет нативную сериализацию, React-рендерер, камеру или GPU.
 let current;
+function slot() {
+  return current.hooks[current.hookIndex++] ??= {};
+}
+function memo(factory, deps) {
+  const entry = slot();
+  if (!entry.deps || deps.length !== entry.deps.length ||
+      deps.some((value, index) => !Object.is(value, entry.deps[index]))) {
+    entry.value = factory();
+    entry.deps = deps;
+  }
+  return entry.value;
+}
 const uiId = 73; // Произвольный id тестовой очереди, не предполагаемый id нативного runtime.
 const native = {
   react: {
-    useCallback: fn => fn,
-    useMemo: fn => fn(),
-    useEffect: fn => { current.effect = fn; },
-    useRef: value => ({ current: value }),
-    useState: value => [value, next => { current.error = next; }],
+    useCallback: (fn, deps) => memo(() => fn, deps),
+    useMemo: memo,
+    useEffect: (fn, deps) => { current.effect = memo(() => fn, deps); },
+    useRef: value => memo(() => ({ current: value }), []),
+    useState: value => memo(() => [value, next => { current.error = next; }], []),
   },
   'react-native-reanimated': {
     useSharedValue(initial) {
-      let value = typeof initial === 'function' ? initial() : initial;
-      return {
-        get: () => value,
-        set: next => { value = typeof next === 'function' ? next(value) : next; },
-        modify: fn => { value = fn(value); },
-      };
+      return memo(() => {
+        let value = typeof initial === 'function' ? initial() : initial;
+        return {
+          get: () => value,
+          set: next => { value = typeof next === 'function' ? next(value) : next; },
+          modify: fn => { value = fn(value); },
+        };
+      }, []);
     },
     useFrameCallback: fn => { current.expire = fn; },
   },
@@ -97,7 +111,8 @@ const empty = { angle: null, bodyVisible: false, modelFps: null, avgMs: null, p9
 
 function setup(t, bundleMode) {
   const h = { bundleMode, runtime: 'RN', ui: [], rn: [], summaries: [], samples: [], releases: [],
-    error: null, now: 1000, runs: 0, fail: false, duringInference: null };
+    error: null, now: 1000, runs: 0, fail: false, duringInference: null,
+    hooks: [], hookIndex: 0 };
   current = h;
   t.mock.method(Date, 'now', () => h.now);
   t.mock.method(performance, 'now', () => h.now);
@@ -128,7 +143,7 @@ function setup(t, bundleMode) {
       dispose() { disposed = true; h.releases.push('resized'); },
     };
   } };
-  const model = { runSync(inputs) {
+  h.model = { runSync(inputs) {
     assert.equal(disposed, false, 'resized input stays alive during inference');
     assert.equal(inputs[0], input);
     h.runs += 1;
@@ -137,11 +152,18 @@ function setup(t, bundleMode) {
     if (h.fail) throw new Error('synthetic inference failure');
     return [h.raw.buffer];
   } };
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- Здесь hook исполняется в тестовом runtime без React-рендерера.
-  h.pipeline = usePosePipeline(model, true, summary => {
+  h.onSummary = summary => {
     assert.equal(h.runtime, 'RN');
     h.summaries.push(summary);
-  }, (angle, bodyVisible) => { h.samples.push({ angle, bodyVisible }); });
+  };
+  h.onSample = (angle, bodyVisible) => { h.samples.push({ angle, bodyVisible }); };
+  h.render = (active = true) => {
+    h.hookIndex = 0;
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Здесь hook исполняется в тестовом runtime без React-рендерера.
+    h.pipeline = usePosePipeline(h.model, active, h.onSummary, h.onSample);
+    return h.pipeline.output;
+  };
+  h.render();
   h.cleanup = h.effect();
   h.flushUI();
   h.flushRN();
@@ -160,6 +182,74 @@ function setup(t, bundleMode) {
 
 for (const bundleMode of [false, true]) {
   const mode = bundleMode ? 'Bundle' : 'Legacy Eval';
+  // Проверяем контракт нашего hook на границе native API, не имитируем его
+  // правила пересоздания output. Реальную CameraSession проверяем на iPhone.
+  test(`${mode}: HUD rerenders retain the same frame callback`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output.onFrame;
+    for (let i = 0; i < 20; i++) {
+      h.now += 300;
+      h.frame(); h.flushUI(); h.flushRN();
+      assert.strictEqual(h.render().onFrame, initial);
+    }
+    assert.equal(h.runs, 20);
+    assert.equal(h.summaries.length, 20);
+  });
+
+  test(`${mode}: rerenders retain the same resolution object`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output.targetResolution;
+    for (let i = 0; i < 20; i++) assert.strictEqual(h.render().targetResolution, initial);
+  });
+
+  test(`${mode}: rerenders retain the complete frame output configuration`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output;
+    for (let i = 0; i < 20; i++) assert.strictEqual(h.render(), initial);
+  });
+
+  test(`${mode}: pause and resume reuse callback while gating frame processing`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output.onFrame;
+    h.cleanup(); h.render(false); h.cleanup = h.effect(); h.flushUI(); h.flushRN();
+    assert.strictEqual(h.pipeline.output.onFrame, initial);
+    h.frame(); h.flushUI(); h.flushRN();
+    assert.equal(h.runs, 0);
+    assert.deepEqual(h.releases, ['frame']);
+    h.cleanup(); h.render(true); h.cleanup = h.effect(); h.flushUI(); h.flushRN();
+    assert.strictEqual(h.pipeline.output.onFrame, initial);
+    h.frame(); h.flushUI(); h.flushRN();
+    assert.equal(h.runs, 1);
+    assert.ok(h.pipeline.pose.get());
+  });
+
+  test(`${mode}: changing model refreshes callback and uses the new model`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output.onFrame;
+    const nextRaw = new Float32Array(h.raw);
+    nextRaw[2] = 0.6;
+    h.model = { runSync: () => [nextRaw.buffer] };
+    h.cleanup(); h.render(); h.cleanup = h.effect(); h.flushUI(); h.flushRN();
+    assert.notStrictEqual(h.pipeline.output.onFrame, initial);
+    h.frame(); h.flushUI(); h.flushRN();
+    assert.equal(h.pipeline.pose.get().points[2], Math.fround(0.6));
+    assert.equal(h.runs, 0);
+  });
+
+  test(`${mode}: changing resizer refreshes callback and uses the new resizer`, t => {
+    const h = setup(t, bundleMode);
+    const initial = h.pipeline.output.onFrame;
+    const resize = h.resizer.resize;
+    let resized = 0;
+    h.resizer = { resize(frame) { resized += 1; return resize(frame); } };
+    h.render();
+    assert.notStrictEqual(h.pipeline.output.onFrame, initial);
+    h.frame(); h.flushUI(); h.flushRN();
+    assert.equal(resized, 1);
+    assert.ok(h.pipeline.pose.get());
+    assert.deepEqual(h.releases, ['resized', 'frame']);
+  });
+
   test(`${mode}: every processed pose supplies scalar counter input independently of HUD throttle`, t => {
     const h = setup(t, bundleMode);
     h.frame(); h.flushUI(); h.flushRN();
