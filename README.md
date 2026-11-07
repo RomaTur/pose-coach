@@ -54,8 +54,9 @@ feature-модулями явные. Сервер, MobX и TanStack Query в э�
 
 ## Симулятор
 
-Проверенное окружение: Node **26.4.0**, pnpm **11.12.0**, Xcode **26.3**,
-iOS Simulator **26.3.1**, Apple Silicon. Нужны CocoaPods и платформа iOS.
+Для установки используйте Node **26.4.0** и pnpm **11.13.1**. Сборка проверялась
+на Xcode **26.3**, iOS Simulator **26.3.1** и Apple Silicon. Нужны CocoaPods
+и платформа iOS.
 Это development build: **Expo Go не подходит** из-за нативных модулей.
 
 ```bash
